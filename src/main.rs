@@ -1,5 +1,25 @@
 use macroquad::prelude::*;
 
+pub struct CollisionBox {
+    x: f32,
+    y: f32,
+    w: f32,
+    h: f32,
+}
+
+impl CollisionBox {
+    pub fn new(x: f32, y: f32, w: f32, h: f32) -> Self {
+        CollisionBox { x, y, w, h }
+    }
+
+    pub fn collides_with(&self, other: &CollisionBox) -> bool {
+        self.x < other.x + other.w
+            && self.x + self.w > other.x
+            && self.y < other.y + other.h
+            && self.y + self.h > other.y
+    }
+}
+
 fn window_conf() -> Conf {
     Conf {
         window_title: "My Game".to_owned(),
@@ -13,26 +33,35 @@ fn window_conf() -> Conf {
 #[macroquad::main(window_conf)]
 async fn main() {
     let mut item_y_pos: f32 = 0.0;
+    let item_x_pos: f32 = screen_width() / 2.0;
     let mut item_speed: f32 = 1.0;
     let item_gravity: f32 = 0.1;
+
+    let width: f32 = 150.0;
+    let height: f32 = 30.0;
+
+    let mut collided: bool = false;
 
     loop {
         clear_background(WHITE);
 
-        let width: f32 = 150.0;
-        let height: f32 = 30.0;
+        let x = mouse_position().0 - width / 2.0;
+        let y = screen_height() - height * 1.25;
 
-        draw_rectangle(
-            mouse_position().0 - width / 2.0,
-            screen_height() - height * 1.25,
-            width,
-            height,
-            GREEN,
-        );
+        draw_rectangle(x, y, width, height, GREEN);
 
-        drop_item(screen_width() / 2.0, item_y_pos);
-        item_y_pos += item_speed;
-        item_speed += item_gravity;
+        if !collided {
+            drop_item(item_x_pos, item_y_pos);
+            item_y_pos += item_speed;
+            item_speed += item_gravity;
+        }
+
+        let player: CollisionBox = CollisionBox::new(x, y, width, height);
+        let item: CollisionBox = CollisionBox::new(item_x_pos, item_y_pos, 25.0, 25.0);
+
+        if player.collides_with(&item) {
+            collided = true;
+        }
 
         next_frame().await
     }
