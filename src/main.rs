@@ -12,6 +12,10 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
+    let mut item_y_pos: f32 = 0.0;
+    let mut item_speed: f32 = 1.0;
+    let item_gravity: f32 = 0.1;
+
     loop {
         clear_background(WHITE);
 
@@ -26,6 +30,14 @@ async fn main() {
             GREEN,
         );
 
+        drop_item(screen_width() / 2.0, item_y_pos);
+        item_y_pos += item_speed;
+        item_speed += item_gravity;
+
         next_frame().await
     }
+}
+
+fn drop_item(x: f32, y: f32) {
+    draw_circle(x, y, 25.0, RED);
 }
