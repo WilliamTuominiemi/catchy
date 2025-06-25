@@ -4,7 +4,7 @@ use collision::CollisionBox;
 
 fn window_conf() -> Conf {
     Conf {
-        window_title: "My Game".to_owned(),
+        window_title: "catchy".to_owned(),
         window_width: 600,
         window_height: 800,
         window_resizable: false,
@@ -14,41 +14,48 @@ fn window_conf() -> Conf {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let mut item_y_pos: f32 = 0.0;
-    let item_x_pos: f32 = screen_width() / 2.0;
-    let mut item_speed: f32 = 1.0;
-    let item_gravity: f32 = 0.1;
+    let item_speed: f32 = 4.0;
 
     let width: f32 = 150.0;
     let height: f32 = 30.0;
 
-    let mut collided: bool = false;
+    let mut items: Vec<CollisionBox> = Vec::new();
+
+    let x = screen_width() / 2.0 - width / 2.0;
+    let y = screen_height() - height * 1.25;
+    let mut player: CollisionBox = CollisionBox::new(x, y, width, height);
 
     loop {
         clear_background(WHITE);
 
-        let x = mouse_position().0 - width / 2.0;
-        let y = screen_height() - height * 1.25;
+        spawner(&mut items);
 
-        draw_rectangle(x, y, width, height, GREEN);
+        draw_rectangle(player.x, player.y, player.w, player.h, GREEN);
+        player.x = mouse_position().0 - width / 2.0;
 
-        if !collided {
-            drop_item(item_x_pos, item_y_pos);
-            item_y_pos += item_speed;
-            item_speed += item_gravity;
+        let mut to_remove = Vec::new();
+        for (index, item) in items.iter_mut().enumerate() {
+            draw_circle(item.x, item.y, 25.0, RED);
+            item.y += item_speed;
+
+            if player.collides_with(item) {
+                to_remove.push(index);
+            }
         }
 
-        let player: CollisionBox = CollisionBox::new(x, y, width, height);
-        let item: CollisionBox = CollisionBox::new(item_x_pos, item_y_pos, 25.0, 25.0);
-
-        if player.collides_with(&item) {
-            collided = true;
+        for index in to_remove.into_iter().rev() {
+            items.remove(index);
         }
 
         next_frame().await
     }
 }
 
-fn drop_item(x: f32, y: f32) {
-    draw_circle(x, y, 25.0, RED);
+fn spawner(items: &mut Vec<CollisionBox>) {
+    if items.len() < 1 {
+        let item_y_pos: f32 = 0.0;
+        let item_x_pos: f32 = screen_width() / 2.0;
+        let _item: CollisionBox = CollisionBox::new(item_x_pos, item_y_pos, 25.0, 25.0);
+        items.push(_item);
+    }
 }
