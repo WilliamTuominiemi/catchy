@@ -27,6 +27,8 @@ async fn main() {
     let mut player: CollisionBox = CollisionBox::new(x, y, width, height);
 
     let mut frame: i32 = 0;
+    let mut score: i32 = 0;
+    let mut health: i32 = 5;
 
     loop {
         frame += 1;
@@ -43,7 +45,11 @@ async fn main() {
             draw_circle(item.x, item.y, 25.0, RED);
             item.y += item_speed;
 
-            if player.collides_with(item) || item.y > screen_height() + item.h {
+            if player.collides_with(item) {
+                score += 1;
+                to_remove.push(index);
+            } else if item.y > screen_height() + item.h {
+                health -= 1;
                 to_remove.push(index);
             }
         }
@@ -51,6 +57,12 @@ async fn main() {
         for index in to_remove.into_iter().rev() {
             items.remove(index);
         }
+
+        let score_text = format!("Score: {}", score);
+        draw_text(&score_text, 20.0, 20.0, 30.0, DARKGRAY);
+
+        let health_text = format!("Health: {}", health);
+        draw_text(&health_text, 20.0, 40.0, 30.0, DARKGRAY);
 
         next_frame().await
     }
