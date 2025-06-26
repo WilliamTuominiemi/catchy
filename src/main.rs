@@ -45,6 +45,7 @@ async fn main() {
 }
 
 fn draw_player(player: &mut CollisionBox) {
+    let speed = 10.0;
     let mut new_x_pos = mouse_position().0 - player.w / 2.0;
 
     if new_x_pos > screen_width() - player.w {
@@ -53,7 +54,14 @@ fn draw_player(player: &mut CollisionBox) {
         new_x_pos = 0.0;
     }
 
-    player.x = new_x_pos;
+    let mut direction = 0.0;
+    if new_x_pos > player.x + speed {
+        direction = speed;
+    } else if new_x_pos < player.x - speed {
+        direction = -speed;
+    }
+
+    player.x += direction;
 
     draw_rectangle(player.x, player.y, player.w, player.h, GREEN);
 }
@@ -88,14 +96,17 @@ fn item_logic(
 fn spawner(items: &mut Vec<CollisionBox>, frame: &mut i32) {
     let random_timer: f32 = random();
 
-    if items.len() < 5 && *frame > (50.0 * random_timer * 1.5) as i32 {
+    if items.len() < 5 && *frame > (750.0 * random_timer * 1.5) as i32 {
         *frame = 0;
 
         let random_x: f32 = random();
 
+        let item_width = 25.0;
+        let item_height = 25.0;
         let item_y_pos: f32 = 0.0;
-        let item_x_pos: f32 = screen_width() * random_x;
-        let _item: CollisionBox = CollisionBox::new(item_x_pos, item_y_pos, 25.0, 25.0);
+        let item_x_pos: f32 = (screen_width() - item_width * 2.0) * random_x + item_width;
+        let _item: CollisionBox =
+            CollisionBox::new(item_x_pos, item_y_pos, item_width, item_height);
         items.push(_item);
     }
 }
