@@ -45,8 +45,17 @@ async fn main() {
 }
 
 fn draw_player(player: &mut CollisionBox) {
+    let mut new_x_pos = mouse_position().0 - player.w / 2.0;
+
+    if new_x_pos > screen_width() - player.w {
+        new_x_pos = screen_width() - player.w;
+    } else if new_x_pos < 0.0 {
+        new_x_pos = 0.0;
+    }
+
+    player.x = new_x_pos;
+
     draw_rectangle(player.x, player.y, player.w, player.h, GREEN);
-    player.x = mouse_position().0 - player.w / 2.0;
 }
 
 fn item_logic(
