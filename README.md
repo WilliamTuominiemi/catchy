@@ -1,1 +1,2 @@
 # catchy
+![Demo](demo.gif)
