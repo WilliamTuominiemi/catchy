@@ -27,23 +27,45 @@ async fn main() {
     let mut score: i32 = 0;
     let mut health: i32 = 5;
 
+    let mut ended: bool = false;
+
     loop {
         frame += 1;
 
         clear_background(WHITE);
 
-        if !item_logic(&mut items, &mut player, &mut score, &mut health) {
+        if !ended {
+            ended = item_logic(&mut items, &mut player, &mut score, &mut health);
+
+            spawner(&mut items, &mut frame);
+
+            draw_player(&mut player);
+
+            draw_texts(score, health);
+        } else {
+            items = Vec::new();
+
             restart(&mut score, &mut health);
+
+            end_screen();
+
+            if is_mouse_button_pressed(MouseButton::Left) {
+                ended = false;
+            }
         }
-
-        spawner(&mut items, &mut frame);
-
-        draw_player(&mut player);
-
-        draw_texts(score, health);
 
         next_frame().await
     }
+}
+
+fn end_screen() {
+    draw_text(
+        "You lost, press anywhere to restart",
+        20.0,
+        screen_height() / 2.0,
+        30.0,
+        DARKGRAY,
+    );
 }
 
 fn restart(score: &mut i32, health: &mut i32) {
@@ -100,9 +122,9 @@ fn item_logic(
     }
 
     if *health == 0 {
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 fn spawner(items: &mut Vec<CollisionBox>, frame: &mut i32) {
