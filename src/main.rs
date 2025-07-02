@@ -32,16 +32,23 @@ async fn main() {
 
         clear_background(WHITE);
 
+        if !item_logic(&mut items, &mut player, &mut score, &mut health) {
+            restart(&mut score, &mut health);
+        }
+
         spawner(&mut items, &mut frame);
 
         draw_player(&mut player);
-
-        item_logic(&mut items, &mut player, &mut score, &mut health);
 
         draw_texts(score, health);
 
         next_frame().await
     }
+}
+
+fn restart(score: &mut i32, health: &mut i32) {
+    *score = 0;
+    *health = 5;
 }
 
 fn draw_player(player: &mut CollisionBox) {
@@ -71,7 +78,7 @@ fn item_logic(
     player: &mut CollisionBox,
     score: &mut i32,
     health: &mut i32,
-) {
+) -> bool {
     let item_speed: f32 = 5.0;
     let mut to_remove: Vec<usize> = Vec::new();
 
@@ -91,6 +98,11 @@ fn item_logic(
     for index in to_remove.into_iter().rev() {
         items.remove(index);
     }
+
+    if *health == 0 {
+        return false;
+    }
+    return true;
 }
 
 fn spawner(items: &mut Vec<CollisionBox>, frame: &mut i32) {
